@@ -167,10 +167,23 @@ namespace MonoDevelop.VersionControl.Git
 				return cred;
 			}
 
-			result = Runtime.RunInMainThread (delegate {
-				using (var credDlg = new CredentialsDialog (url, types, cred))
-					return MessageService.ShowCustomDialog (credDlg) == (int)Gtk.ResponseType.Ok;
-			}).Result;
+			var gitCredentialsProviders = Mono.Addins.AddinManager.GetExtensionObjects<IGitCredentialsProvider> ();
+
+			foreach (var gitCredentialsProvider in gitCredentialsProviders) {
+				if (gitCredentialsProvider.SupportsUrl (url)) {
+					var gitCredential = gitCredentialsProvider.GetCredentials (url);
+					if (gitCredential != null) {
+						((UsernamePasswordCredentials)cred).Username = string.Empty;
+						((UsernamePasswordCredentials)cred).Password = gitCredential.Password;
+					}
+					result = gitCredential != null;
+				} else {
+					result = Runtime.RunInMainThread (delegate {
+						using (var credDlg = new CredentialsDialog (url, types, cred))
+							return MessageService.ShowCustomDialog (credDlg) == (int)Gtk.ResponseType.Ok;
+					}).Result;
+				}
+			}
 
 			if (result) {
 				if ((types & SupportedCredentialTypes.UsernamePassword) != 0) {
