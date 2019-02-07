@@ -94,9 +94,7 @@ namespace MonoDevelop.VersionControl.Git
 			// if the password store contains an invalid password/no password
 			if ((types & SupportedCredentialTypes.UsernamePassword) != 0) {
 				if (Uri.TryCreate (url, UriKind.RelativeOrAbsolute, out uri)) {
-					string username;
-					string password;
-					if (!state.NativePasswordUsed && TryGetUsernamePassword (uri, out username, out password)) {
+					if (!state.NativePasswordUsed && TryGetUsernamePassword (uri, out var username, out var password)) {
 						state.NativePasswordUsed = true;
 						return new UsernamePasswordCredentials {
 							Username = username,
