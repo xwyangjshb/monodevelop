@@ -23,14 +23,16 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-using System;
 
+using System;
 using MonoDevelop.Core;
 using MonoDevelop.Ide;
 using LibGit2Sharp;
 using System.IO;
 using System.Collections.Generic;
 using MonoDevelop.Components;
+using System.Linq;
+using Mono.Addins;
 
 namespace MonoDevelop.VersionControl.Git
 {
@@ -117,7 +119,7 @@ namespace MonoDevelop.VersionControl.Git
 					if (agentUsable) {
 						state.AgentUsed = true;
 						return new SshAgentCredentials {
-							Username = userFromUrl,
+							Username = userFromUrl
 						};
 					}
 				}
@@ -145,10 +147,7 @@ namespace MonoDevelop.VersionControl.Git
 						};
 
 						if (KeyHasPassphrase (dlg.SelectedFile)) {
-							result = Runtime.RunInMainThread (delegate {
-								using (var credDlg = new CredentialsDialog (url, types, cred))
-									return MessageService.ShowCustomDialog (credDlg) == (int)Gtk.ResponseType.Ok;
-							}).Result;
+							result = BasicCredentials (url, types, cred);
 						}
 
 						if (result)
@@ -167,22 +166,18 @@ namespace MonoDevelop.VersionControl.Git
 				return cred;
 			}
 
-			var gitCredentialsProviders = Mono.Addins.AddinManager.GetExtensionObjects<IGitCredentialsProvider> ();
+			var gitCredentialsProviders = AddinManager.GetExtensionObjects<IGitCredentialsProvider> ();
 
-			foreach (var gitCredentialsProvider in gitCredentialsProviders) {
-				if (gitCredentialsProvider.SupportsUrl (url)) {
-					var gitCredential = gitCredentialsProvider.GetCredentials (url);
-					if (gitCredential != null) {
-						((UsernamePasswordCredentials)cred).Username = string.Empty;
-						((UsernamePasswordCredentials)cred).Password = gitCredential.Password;
+			if (gitCredentialsProviders != null && gitCredentialsProviders.Any ()) {
+				foreach (var gitCredentialsProvider in gitCredentialsProviders) {
+					if (gitCredentialsProvider.SupportsUrl (url)) {
+						result = PatCredentials (gitCredentialsProvider, url, types, cred);
+					} else {
+						result = BasicCredentials (url, types, cred);
 					}
-					result = gitCredential != null;
-				} else {
-					result = Runtime.RunInMainThread (delegate {
-						using (var credDlg = new CredentialsDialog (url, types, cred))
-							return MessageService.ShowCustomDialog (credDlg) == (int)Gtk.ResponseType.Ok;
-					}).Result;
 				}
+			} else {
+				result = BasicCredentials (url, types, cred);
 			}
 
 			if (result) {
@@ -196,6 +191,29 @@ namespace MonoDevelop.VersionControl.Git
 			}
 
 			throw new VersionControlException (GettextCatalog.GetString ("Operation cancelled by the user"));
+		}
+
+		static bool PatCredentials(IGitCredentialsProvider gitCredentialsProvider, string uri, SupportedCredentialTypes type, Credentials cred)
+		{
+			if (type != SupportedCredentialTypes.UsernamePassword)
+				return false;
+
+			var provider = gitCredentialsProvider.GetCredentials (uri);
+		
+			if (provider != null) {
+				((UsernamePasswordCredentials)cred).Username = provider.Username;
+				((UsernamePasswordCredentials)cred).Password = provider.Password;
+			}
+
+			return provider != null;
+		}
+
+		static bool BasicCredentials(string uri, SupportedCredentialTypes type, Credentials cred)
+		{
+			return Runtime.RunInMainThread (delegate {
+				using (var credDlg = new CredentialsDialog (uri, type, cred))
+					return MessageService.ShowCustomDialog (credDlg) == (int)Gtk.ResponseType.Ok;
+			}).Result;
 		}
 
 		static bool KeyHasPassphrase (string key)

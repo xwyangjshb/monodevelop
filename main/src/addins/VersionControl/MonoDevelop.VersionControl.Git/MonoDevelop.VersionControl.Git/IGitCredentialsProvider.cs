@@ -24,8 +24,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using Mono.Addins;
+
 namespace MonoDevelop.VersionControl.Git
 {
+	[TypeExtensionPoint]
 	public interface IGitCredentialsProvider
 	{
 		bool SupportsUrl (string url);
@@ -34,7 +37,7 @@ namespace MonoDevelop.VersionControl.Git
 
 	public class GitCredential
 	{
-		public GitCredential(string username, string password)
+		public GitCredential (string username, string password)
 		{
 			Username = username;
 			Password = password;
