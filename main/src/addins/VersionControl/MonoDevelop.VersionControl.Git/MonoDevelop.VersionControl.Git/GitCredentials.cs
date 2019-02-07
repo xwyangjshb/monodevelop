@@ -145,7 +145,7 @@ namespace MonoDevelop.VersionControl.Git
 						};
 
 						if (KeyHasPassphrase (dlg.SelectedFile)) {
-							result = BasicCredentials (url, types, cred);
+							result = GetCredentials (url, types, cred);
 						}
 
 						if (result)
@@ -166,16 +166,18 @@ namespace MonoDevelop.VersionControl.Git
 
 			var gitCredentialsProviders = AddinManager.GetExtensionObjects<IGitCredentialsProvider> ();
 
-			if (gitCredentialsProviders != null && gitCredentialsProviders.Any ()) {
+			if (gitCredentialsProviders != null) {
 				foreach (var gitCredentialsProvider in gitCredentialsProviders) {
 					if (gitCredentialsProvider.SupportsUrl (url)) {
-						result = PatCredentials (gitCredentialsProvider, url, types, cred);
-					} else {
-						result = BasicCredentials (url, types, cred);
+						result = GetCredentialsFromProvider (gitCredentialsProvider, url, types, cred);
+						if (result)
+							break;
 					}
 				}
-			} else {
-				result = BasicCredentials (url, types, cred);
+			}
+
+			if (!result) {
+				result = GetCredentials (url, types, cred);
 			}
 
 			if (result) {
@@ -191,7 +193,7 @@ namespace MonoDevelop.VersionControl.Git
 			throw new VersionControlException (GettextCatalog.GetString ("Operation cancelled by the user"));
 		}
 
-		static bool PatCredentials(IGitCredentialsProvider gitCredentialsProvider, string uri, SupportedCredentialTypes type, Credentials cred)
+		static bool GetCredentialsFromProvider (IGitCredentialsProvider gitCredentialsProvider, string uri, SupportedCredentialTypes type, Credentials cred)
 		{
 			if (type != SupportedCredentialTypes.UsernamePassword)
 				return false;
@@ -206,7 +208,7 @@ namespace MonoDevelop.VersionControl.Git
 			return provider != null;
 		}
 
-		static bool BasicCredentials(string uri, SupportedCredentialTypes type, Credentials cred)
+		static bool GetCredentials (string uri, SupportedCredentialTypes type, Credentials cred)
 		{
 			return Runtime.RunInMainThread (delegate {
 				using (var credDlg = new CredentialsDialog (uri, type, cred))
