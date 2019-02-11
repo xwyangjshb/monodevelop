@@ -117,7 +117,7 @@ namespace MonoDevelop.VersionControl.Git
 					if (agentUsable) {
 						state.AgentUsed = true;
 						return new SshAgentCredentials {
-							Username = userFromUrl
+							Username = userFromUrl,
 						};
 					}
 				}
