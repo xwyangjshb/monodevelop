@@ -129,7 +129,7 @@ type ``Template tests``() =
                 Assert.Fail (sprintf "%A" error)
 
             Assert.Pass()
-        }
+        } |> toTask
 
     let test templateId = testWithParameters templateId templateId ""
 
