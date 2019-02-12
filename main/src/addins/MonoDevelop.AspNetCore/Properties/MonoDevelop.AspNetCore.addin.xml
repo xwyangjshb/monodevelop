@@ -169,6 +169,18 @@
 				category="netcore/app/aspnet"
 				formatExclude="*.min.css|*.min.js|*.map"
 				defaultParameters="IncludeLaunchSettings=true" />
+			<Template
+				id="Microsoft.DotNet.Web.Spa.ProjectTemplates.Angular"
+				templateId="Microsoft.DotNet.Web.Spa.ProjectTemplates.Angular.CSharp.3.0"
+				_overrideName="Angular"
+				_overrideDescription="ASP.NET Core with Angular."
+				path="${DotNetCoreSdk.3.0.Templates.Web.Spa.ProjectTemplates.nupkg}"
+				icon="md-netcore-empty-project"
+				imageId="md-netcore-empty-project"
+				wizard="MonoDevelop.DotNetCore.ProjectTemplateWizard"
+				condition="UseNetCore30=true"
+				category="netcore/app/aspnet"
+				defaultParameters="IncludeLaunchSettings=true" />	
 		</Condition>
 		<Condition id="AspNetCoreSdkInstalled" sdkVersion="2.2">
 			<Template
