@@ -77,7 +77,7 @@ type ``Template tests``() =
             Assert.Ignore ()
 
         let projectTemplate = ProjectTemplate.ProjectTemplates |> Seq.find (fun t -> t.Id = tt)
-        toTask <| async {
+        async {
             let dir = FilePath (templatesDir/buildFolder)
             dir.Delete()
             Directory.CreateDirectory (dir |> string) |> ignore
@@ -125,11 +125,10 @@ type ``Template tests``() =
             // at the top of the project file.
             do! sln.SaveAsync(monitor)
             do! NuGetPackageInstaller.InstallPackages (sln, projectTemplate.PackageReferencesForCreatedProjects)
+            for error in getErrorsForProject sln do
+                Assert.Fail (sprintf "%A" error)
 
-            let errors = getErrorsForProject sln |> AsyncSeq.toSeq |> List.ofSeq
-            match errors with
-            | [] -> Assert.Pass()
-            | errors -> Assert.Fail (sprintf "%A" errors)
+            Assert.Pass()
         }
 
     let test templateId = testWithParameters templateId templateId ""
@@ -212,10 +211,11 @@ type ``Template tests``() =
 
             wwwrootFiles |> Seq.length |> should equal 41
             wwwrootFiles |> Seq.iter(fun imported -> imported |> should equal true)
-            let errors = getErrorsForProject solution |> AsyncSeq.toSeq |> List.ofSeq
-            match errors with
-            | [] -> Assert.Pass()
-            | errors -> Assert.Fail (sprintf "%A" errors)
+
+            for error in getErrorsForProject solution do
+                Assert.Fail (sprintf "%A" error)
+
+            Assert.Pass()
         } |> toTask
 
     [<Ignore("Currently not testable as SDK project is dependent on wizard being ran");AsyncStateMachine(typeof<Task>)>]member x.``Xamarin Forms FSharp FormsApp``()= testWithParameters "Xamarin.Forms.FSharp.FormsApp" "Xamarin.Forms.FSharp.FormsApp" "SafeUserDefinedProjectName=Xamarin_Forms_FSharp_FormsApp_Shared"
