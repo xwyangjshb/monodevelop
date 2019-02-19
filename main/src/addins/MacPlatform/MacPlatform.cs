@@ -968,6 +968,16 @@ namespace MonoDevelop.MacIntegration
 			NSApplication.SharedApplication.ActivateIgnoringOtherApps (true);
 		}
 
+		public override Window GetParentForModalWindow ()
+		{
+			return NSApplication.SharedApplication.KeyWindow ?? NSApplication.SharedApplication.MainWindow;
+		}
+
+		public override Window GetFocusedTopLevelWindow ()
+		{
+			return NSApplication.SharedApplication.KeyWindow;
+		}
+
 		public override void FocusWindow (Window window)
 		{
 			try {
@@ -1359,6 +1369,14 @@ namespace MonoDevelop.MacIntegration
 
 	public class ThemedMacDialogBackend : Xwt.Mac.DialogBackend
 	{
+		public ThemedMacDialogBackend ()
+		{
+		}
+
+		public ThemedMacDialogBackend (IntPtr ptr) : base (ptr)
+		{
+		}
+
 		public override void InitializeBackend (object frontend, Xwt.Backends.ApplicationContext context)
 		{
 			base.InitializeBackend (frontend, context);
@@ -1368,6 +1386,14 @@ namespace MonoDevelop.MacIntegration
 
 	public class ThemedMacAlertDialogBackend : Xwt.Mac.AlertDialogBackend
 	{
+		public ThemedMacAlertDialogBackend ()
+		{
+		}
+
+		public ThemedMacAlertDialogBackend (IntPtr ptr) : base (ptr)
+		{
+		}
+
 		public override void Initialize (Xwt.Backends.ApplicationContext actx)
 		{
 			base.Initialize (actx);
