@@ -198,14 +198,14 @@ namespace MonoDevelop.VersionControl.Git
 			if (type != SupportedCredentialTypes.UsernamePassword)
 				return false;
 
-			var provider = gitCredentialsProvider.GetCredentials (uri);
+			var (exists, credentials) = gitCredentialsProvider.GetCredentialsAsync (uri).Result;
 		
-			if (provider != null) {
-				((UsernamePasswordCredentials)cred).Username = provider.Username;
-				((UsernamePasswordCredentials)cred).Password = provider.Password;
+			if (exists) {
+				((UsernamePasswordCredentials)cred).Username = credentials.Username;
+				((UsernamePasswordCredentials)cred).Password = credentials.Password;
 			}
 
-			return provider != null;
+			return exists;
 		}
 
 		static bool GetCredentials (string uri, SupportedCredentialTypes type, Credentials cred)

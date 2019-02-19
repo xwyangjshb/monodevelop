@@ -24,6 +24,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System.Threading.Tasks;
 using Mono.Addins;
 
 namespace MonoDevelop.VersionControl.Git
@@ -32,7 +33,7 @@ namespace MonoDevelop.VersionControl.Git
 	public interface IGitCredentialsProvider
 	{
 		bool SupportsUrl (string url);
-		GitCredential GetCredentials (string url);
+		Task<(bool exists, GitCredential credentials)> GetCredentialsAsync (string url);
 	}
 
 	public class GitCredential
