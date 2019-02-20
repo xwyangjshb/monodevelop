@@ -383,16 +383,16 @@ namespace MonoDevelop.Components.DockNotebook
 			if (pages.Count == 1)
 				return;
 			
-			var stickedPages = pages.Where (p => p.IsPinned).OrderBy (p => p.Index).ToList ();
-			var normalPages = pages.Where (p => !p.IsPinned).OrderBy (p => p.Index).ToList ();
+			var stickedPages = pages.Where (p => p.IsPinned).OrderBy (p => p.Index);
+			var normalPages = pages.Where (p => !p.IsPinned).OrderBy (p => p.Index);
 
 			if (value) {
-				if (stickedPages.Count > 0) 
-					ReorderTab (sender, normalPages.Count > 0  ? normalPages [0] : stickedPages [stickedPages.Count - 1], false);
+				if (stickedPages.Any ()) 
+					ReorderTab (sender, normalPages.FirstOrDefault () ?? stickedPages.LastOrDefault (), false);
 				 else 
-					ReorderTab (sender, pages [0], false);
+					ReorderTab (sender, pages.FirstOrDefault (), false);
 			} else {
-				ReorderTab (sender, stickedPages.Count>0 ? stickedPages [stickedPages.Count - 1] : normalPages [0], false);
+				ReorderTab (sender, stickedPages.LastOrDefault () ?? normalPages.FirstOrDefault (), false);
 			}
 		}
 
