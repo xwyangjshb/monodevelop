@@ -10,10 +10,16 @@ namespace MonoDevelop.VersionControl
 {
 	internal class PublishCommand 
 	{
-		public static bool Publish (WorkspaceObject entry, FilePath localPath, bool test)
+		public static bool Publish (VersionControlItemList items, WorkspaceObject entry, FilePath localPath, bool test)
 		{
-			if (test)
+			if (test) {
+				var canUpdate = !items.Any (it => it.VersionInfo.CanUpdate);
+
+				if (canUpdate)
+					return true;
+
 				return VersionControlService.CheckVersionControlInstalled () && VersionControlService.GetRepository (entry) == null;
+			}
 
 			List<FilePath> files = new List<FilePath> ();
 
