@@ -111,6 +111,21 @@ namespace MonoDevelop.Components.DockNotebook
 			};
 
 			allNotebooks.Add (this);
+
+			tabStrip.IsPinEnabled = IdeApp.Preferences.EnablePinnedTabs.Value;
+			RefreshCurrentTabStrip ();
+
+			IdeApp.Preferences.EnablePinnedTabs.Changed += EnablePinnedTabs_Changed;
+		}
+
+		void EnablePinnedTabs_Changed (object sender, EventArgs e) => RefreshCurrentTabStrip ();
+
+		void RefreshCurrentTabStrip ()
+		{
+			tabStrip.IsPinEnabled = IdeApp.Preferences.EnablePinnedTabs.Value;
+			if (!tabStrip.IsPinEnabled) {
+				pages.ToList ().ForEach (d => d.IsPinned = false);
+			}
 		}
 
 		public static DockNotebook ActiveNotebook {
@@ -409,14 +424,6 @@ namespace MonoDevelop.Components.DockNotebook
 			NotebookChanged?.Invoke (this, EventArgs.Empty);
 		}
 
-		internal void SetPinTabEnabled (bool enabled)
-		{
-			tabStrip.SetPinTabEnabled (enabled);
-			if (!enabled) {
-				pages.ToList ().ForEach (d => d.IsPinned = false);
-			}
-		}
-
 		internal void ReorderTab (DockNotebookTab tab, DockNotebookTab targetTab, bool pinCheck = true)
 		{
 			if (pinCheck && tab.IsPinned != targetTab.IsPinned)
@@ -479,6 +486,12 @@ namespace MonoDevelop.Components.DockNotebook
 				fleurCursor = null;
 			}
 			base.OnDestroyed ();
+		}
+
+		public override void Dispose ()
+		{
+			IdeApp.Preferences.EnablePinnedTabs.Changed -= EnablePinnedTabs_Changed;
+			base.Dispose ();
 		}
 	}
 

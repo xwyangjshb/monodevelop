@@ -112,7 +112,7 @@ namespace MonoDevelop.Ide.Commands
 	{
 		protected override void Update (CommandInfo info)
 		{
-			info.Visible = info.Enabled = DefaultSourceEditorOptions.Instance.EnablePinTabs && IdeApp.Workbench.Documents.Count != 0;
+			info.Visible = info.Enabled = IdeApp.Preferences.EnablePinnedTabs && IdeApp.Workbench.Documents.Count != 0;
 		}
 
 		protected override ImmutableArray<ViewContent> GetDocumentExceptions ()
@@ -133,7 +133,7 @@ namespace MonoDevelop.Ide.Commands
 	{
 		protected override void Update (CommandInfo info)
 		{
-			info.Visible = info.Enabled = DefaultSourceEditorOptions.Instance.EnablePinTabs && IdeApp.Workbench.ActiveDocument != null;
+			info.Visible = info.Enabled = IdeApp.Preferences.EnablePinnedTabs && IdeApp.Workbench.ActiveDocument != null;
 			if (!info.Visible)
 				return;
 			

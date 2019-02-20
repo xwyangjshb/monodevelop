@@ -61,7 +61,6 @@ namespace MonoDevelop.Components.DockNotebook
 		bool buttonPressedOnTab;
 		int tabStartX, tabEndX;
 		bool isActiveNotebook;
-		bool isPinEnabled;
 
 		MouseTracker tracker;
 
@@ -115,6 +114,8 @@ namespace MonoDevelop.Components.DockNotebook
 				}
 			}
 		}
+
+		public bool IsPinEnabled { get; set; }
 
 		public bool  NavigationButtonsVisible {
 			get { return NextButton.Visible; }
@@ -225,8 +226,7 @@ namespace MonoDevelop.Components.DockNotebook
 			innerBox.PackStart (PreviousButton, false, false, 0);
 			innerBox.PackStart (NextButton, false, false, 0);
 			innerBox.PackEnd (DropDownButton, false, false, 0);
-			isPinEnabled = DefaultSourceEditorOptions.Instance.EnablePinTabs;
-
+	
 			tracker.HoveredChanged += (sender, e) => {
 				if (!tracker.Hovered) {
 					SetHighlightedTab (null);
@@ -252,9 +252,9 @@ namespace MonoDevelop.Components.DockNotebook
 			closingTabs = new Dictionary<int, DockNotebookTab> ();
 		}
 
-		internal void SetPinTabEnabled (bool value)
+		void EnablePinnedTabs_Changed (object sender, EventArgs e)
 		{
-			isPinEnabled = value;
+			IsPinEnabled = IdeApp.Preferences.EnablePinnedTabs;
 		}
 
 		protected override void OnDestroyed ()
@@ -631,7 +631,7 @@ namespace MonoDevelop.Components.DockNotebook
 					notebook.OnCloseTab (t);
 					allowDoubleClick = false;
 					return true;
-				} else if (isPinEnabled && t != null && overPinOnPress && IsOverPinButton (t, (int)evnt.X, (int)evnt.Y)) {
+				} else if (IsPinEnabled && t != null && overPinOnPress && IsOverPinButton (t, (int)evnt.X, (int)evnt.Y)) {
 					t.IsPinned = !t.IsPinned;
 					notebook.OnPinTab (t);
 					allowDoubleClick = false;
@@ -1179,7 +1179,7 @@ namespace MonoDevelop.Components.DockNotebook
 			leftPadding = (leftPadding * Math.Min (1.0, Math.Max (0.5, (tabBounds.Width - 30) / 70.0)));
 			double bottomPadding = active ? TabActivePadding.Bottom : TabPadding.Bottom;
 
-			DrawTabBackground (this, ctx, allocation, tabBounds.Width, tabBounds.X, active, isPinEnabled ? tab.IsPinned : false);
+			DrawTabBackground (this, ctx, allocation, tabBounds.Width, tabBounds.X, active, IsPinEnabled ? tab.IsPinned : false);
 
 			ctx.LineWidth = 1;
 			ctx.NewPath ();
@@ -1201,8 +1201,8 @@ namespace MonoDevelop.Components.DockNotebook
 			bool closeButtonHovered = tracker.Hovered && tab.CloseButtonActiveArea.Contains (tracker.MousePosition);
 			bool pinButtonHovered = tracker.Hovered && tab.PinButtonActiveArea.Contains (tracker.MousePosition);
 			bool tabHovered = tracker.Hovered && tab.Allocation.Contains (tracker.MousePosition);
-			bool drawCloseButton = (isPinEnabled && tab.IsPinned) || (active || tabHovered || focused);
-			bool drawPinButton = isPinEnabled  && (tab.IsPinned || tabHovered);
+			bool drawCloseButton = (IsPinEnabled && tab.IsPinned) || (active || tabHovered || focused);
+			bool drawPinButton = IsPinEnabled  && (tab.IsPinned || tabHovered);
 
 			if (!closeButtonHovered && tab.DirtyStrength > 0.5) {
 				ctx.DrawImage (this, tabDirtyImage, closeButtonAlloation.X, closeButtonAlloation.Y);
