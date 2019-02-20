@@ -382,17 +382,17 @@ namespace MonoDevelop.Components.DockNotebook
 		{
 			if (pages.Count == 1)
 				return;
-			
-			var stickedPages = pages.Where (p => p.IsPinned).OrderBy (p => p.Index);
-			var normalPages = pages.Where (p => !p.IsPinned).OrderBy (p => p.Index);
+
+			var stickedPages = pages.Where (p => p.IsPinned);
+			var normalPages = pages.Where (p => !p.IsPinned);
 
 			if (value) {
 				if (stickedPages.Any ()) 
-					ReorderTab (sender, normalPages.FirstOrDefault () ?? stickedPages.LastOrDefault (), false);
+					ReorderTab (sender, normalPages.MinValueOrDefault (s => s.Index) ?? stickedPages.MaxValueOrDefault (s => s.Index), false);
 				 else 
 					ReorderTab (sender, pages.FirstOrDefault (), false);
 			} else {
-				ReorderTab (sender, stickedPages.LastOrDefault () ?? normalPages.FirstOrDefault (), false);
+				ReorderTab (sender, stickedPages.MaxValueOrDefault (s => s.Index) ?? normalPages.MinValueOrDefault (s => s.Index), false);
 			}
 		}
 
