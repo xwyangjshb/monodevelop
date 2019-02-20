@@ -61,6 +61,16 @@ namespace MonoDevelop.Ide.Commands
 			return ImmutableArray<ViewContent>.Empty;
 		}
 
+		bool HasDistinctViewContent (ImmutableArray<ViewContent> viewContents, Document document)
+		{
+			for (int i = 0; i < viewContents.Length; i++) {
+				if (document.Window.ViewContent == viewContents[i]) {
+					return false;
+				}
+			}
+			return true;
+		}
+
 		protected override void Run ()
 		{
 			var active = IdeApp.Workbench.ActiveDocument;
@@ -71,7 +81,7 @@ namespace MonoDevelop.Ide.Commands
 			var excluded = GetDocumentExceptions ();
 
 			var docs = IdeApp.Workbench.Documents
-				.Where (doc => ((SdiWorkspaceWindow)doc.Window).TabControl == activeNotebook && (excluded == null || !excluded.Any (except => doc.Window.ViewContent == except)))
+				.Where (doc => ((SdiWorkspaceWindow)doc.Window).TabControl == activeNotebook && (excluded == null || HasDistinctViewContent (excluded,doc)))
 				.ToArray ();
 
 			var dirtyDialogShown = docs.Count (doc => doc.IsDirty) > 1;
