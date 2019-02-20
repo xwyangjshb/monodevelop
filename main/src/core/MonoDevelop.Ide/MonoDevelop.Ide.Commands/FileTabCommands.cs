@@ -39,6 +39,7 @@ using MonoDevelop.Ide.Gui.Dialogs;
 using MonoDevelop.Ide.Editor;
 using MonoDevelop.Components.DockNotebook;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace MonoDevelop.Ide.Commands
 {
@@ -55,9 +56,9 @@ namespace MonoDevelop.Ide.Commands
 	
 	class CloseAllHandler : TabCommandHandler
 	{
-		protected virtual List<ViewContent> GetDocumentExceptions ()
+		protected virtual ImmutableArray<ViewContent> GetDocumentExceptions ()
 		{
-			return null;
+			return ImmutableArray<ViewContent>.Empty;
 		}
 
 		protected override void Run ()
@@ -114,17 +115,17 @@ namespace MonoDevelop.Ide.Commands
 			info.Visible = info.Enabled = DefaultSourceEditorOptions.Instance.EnablePinTabs && IdeApp.Workbench.Documents.Count != 0;
 		}
 
-		protected override List<ViewContent> GetDocumentExceptions ()
+		protected override ImmutableArray<ViewContent> GetDocumentExceptions ()
 		{
 			var active = IdeApp.Workbench.ActiveDocument;
 			if (active == null)
-				return null;
+				return ImmutableArray<ViewContent>.Empty;
 			var activeNotebook = ((SdiWorkspaceWindow)active.Window).TabControl;
 
 			var contents = IdeApp.Workbench.Documents.Where (doc => ((SdiWorkspaceWindow)doc.Window).TabControl == activeNotebook && GetTabFromDocument (doc).IsPinned)
 				.Select (s => s.Window.ViewContent);
 
-			return contents.ToList ();
+			return contents.ToImmutableArray ();
 		}
 	}
 
@@ -152,13 +153,13 @@ namespace MonoDevelop.Ide.Commands
 
 	class CloseAllButThisHandler : CloseAllHandler
 	{
-		protected override List<ViewContent> GetDocumentExceptions ()
+		protected override ImmutableArray<ViewContent> GetDocumentExceptions ()
 		{
 			var active = IdeApp.Workbench.ActiveDocument;
 			if (active == null) {
-				return null;
+				return ImmutableArray<ViewContent>.Empty;
 			}
-			return new List<ViewContent> () { active.Window.ViewContent };
+			return new ImmutableArray<ViewContent> () { active.Window.ViewContent };
 		}
 	}
 	
