@@ -13,9 +13,9 @@ namespace MonoDevelop.VersionControl
 		public static bool Publish (VersionControlItemList items, WorkspaceObject entry, FilePath localPath, bool test)
 		{
 			if (test) {
-				var canUpdate = !items.Any (it => it.VersionInfo.CanUpdate);
+				var canPublish = !items.Any (it => it.VersionInfo.CanUpdate);
 
-				if (canUpdate)
+				if (canPublish)
 					return true;
 
 				return VersionControlService.CheckVersionControlInstalled () && VersionControlService.GetRepository (entry) == null;
